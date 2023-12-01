@@ -56,8 +56,11 @@ class BaseTokenizer(ITokenizer):
 
     def add_token(self, token: str):
         token_id = self.vocab_size
+        # print(token_id) #0-61
         self._token_to_id[token] = token_id
+        # print(self._token_to_id)
         self._id_to_token[token_id] = token
+        # print( self._id_to_token[token_id])
         return token_id
 
     @check_token(PAD)
@@ -69,7 +72,8 @@ class BaseTokenizer(ITokenizer):
     @check_token(EOS)
     def add_eos_token(self, token=EOS) -> ITokenizer:
         token_id = self.add_token(token)
-        self.special_tokens._eos = (token, token_id)
+        # print(token_id)
+        self.special_tokens._eos = (token, token_id) 
         return self
 
     def _reset_id_to_token(self) -> None:
@@ -77,6 +81,7 @@ class BaseTokenizer(ITokenizer):
             self._token_to_id.values(),
             self._token_to_id.keys()
             ))
+        # print(self._id_to_token)
 
     def __set_special_tokens_dict(self, data: dict) -> None:
         if self._pad_key in data:
@@ -105,9 +110,14 @@ class BaseTokenizer(ITokenizer):
         return self
 
     def set_tokenizer(self, data: List[str], *args, **kwargs) -> ITokenizer:
+        # print(data) #문장만 split된 data 출력
         all_tokens = self.get_tokens(data)
-        _ = list(map(self.add_token, all_tokens))
+        # print(all_tokens)
+        _ = list(map(self.add_token, all_tokens)) 
+        # print(_)
+        # print(self._id_to_token)
         self._reset_id_to_token()
+        # print(self._id_to_token)
         return self
 
     def save_tokenizer(
@@ -144,7 +154,7 @@ class CharTokenizer(BaseTokenizer):
         super().__init__()
 
     def get_tokens(self, data: List[str]):
-        return set(''.join(data))
+        return set(''.join(data)) # 문장들의 공통적으로 들어있는 알파벳(고유한 값))set >> unique값들의 원소들 출력
 
     def preprocess_tokens(self, sentence: str) -> List[str]:
         return list(sentence)

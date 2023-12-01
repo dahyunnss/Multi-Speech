@@ -21,6 +21,9 @@ class TextLoader(IDataLoader):
         self.file_path = file_path
 
     def load(self):
+
         with open(self.file_path, 'r') as f:
             data = f.read()
         return data
+    
+

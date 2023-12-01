@@ -56,16 +56,25 @@ def add_model_args(parser):
     )
 
 
-def add_training_args(parser):
+def add_training_args(parser): #경로
+    
     group = parser.add_argument_group('Training')
+  
+    # group.add_argument(
+    #     '--train_path', type=str, required= False, default= r'/userHome/userhome2/dahyun/MultiSpeech/train_data/train_data.txt'
+    # )
     group.add_argument(
-        '--train_path', type=str, required=True
+        '--train_path', type=str, required= True
+    )
+
+    # group.add_argument(
+    #     '--test_path', type=str, required=False, default= r'/userHome/userhome2/dahyun/MultiSpeech/test_data/vctk_test.psv'
+    # )
+    group.add_argument(
+         '--test_path', type=str, required=True
     )
     group.add_argument(
-        '--test_path', type=str, required=True
-    )
-    group.add_argument(
-        '--checkpoint_dir', type=str, required=True
+        '--checkpoint_dir', type=str, required= True
     )
     group.add_argument(
         '--pretrained_path', type=str, required=False, default=None
@@ -74,10 +83,10 @@ def add_training_args(parser):
         '--steps_per_ckpt', type=int
     )
     group.add_argument(
-        '--epochs', type=int, required=True
+        '--epochs', type=int, required=False, default=100
     )
     group.add_argument(
-        '--batch_size', type=int, required=True
+        '--batch_size', type=int, default=8, required=False
     )
     group.add_argument(
         '--opt_eps', type=float, default=1e-9
@@ -99,7 +108,7 @@ def add_training_args(parser):
 def add_data_args(parser):
     group = parser.add_argument_group('Data')
     group.add_argument(
-        '--tokenizer_path', type=str, default=None
+        '--tokenizer_path', type=str, default=None 
     )
     group.add_argument(
         '--n_mels', type=int, default=80
@@ -132,6 +141,7 @@ def get_argparse():
 def get_args() -> dict:
     parser = get_argparse()
     args = parser.parse_args()
+
     return args
 
 
@@ -188,7 +198,7 @@ def get_model_args(
         'p_dropout': p_dopout,
         'left_shift': args.left_shift,
         'right_shift': args.right_shift,
-        'max_steps': args.max_steps,
+        'max_steps': args.max_steps,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
         'hidden_size': args.hidden_size
     }
     speaker_mod_params[speaker_mod_key] = {
@@ -199,7 +209,7 @@ def get_model_args(
     prenet_params[prenet_key] = {
         'inp_size': args.n_mels,
         'bottleneck_size': args.bottleneck_size,
-        'd_model': d_model,
+        'd_model': d_model,                                                                                                               
         'p_dropout': p_dopout
     }
     pred_params[pred_key] = {
@@ -235,7 +245,7 @@ def get_optim_args(args: dict) -> dict:
     }
 
 
-def get_aud_args(args: dict) -> dict:
+def get_aud_args(args: dict) -> dict: # Signal Audio Processing
     return {
         'sampling_rate': args.sampling_rate,
         'win_size': args.window_size,

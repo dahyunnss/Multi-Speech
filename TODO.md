@@ -4,7 +4,7 @@
 - [ ] Add predict file.
 - [ ] Refactor train.py.
 - [ ] Add checkpoint per step.
-- [ ] Add Tensorboard.
+- [o] Add Tensorboard.
 - [ ] Add better logging.
 - [ ] Add distributed training.
 - [ ] Add documentation.

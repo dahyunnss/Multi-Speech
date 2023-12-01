@@ -7,7 +7,7 @@ from utils import get_resampler
 from interfaces import ITokenizer, IPipeline
 
 
-class AudioPipeline(IPipeline):
+class AudioPipeline(IPipeline): # Audio Signal Processing
     def __init__(
             self,
             sampling_rate: int,
@@ -18,7 +18,7 @@ class AudioPipeline(IPipeline):
             ) -> None:
         super().__init__()
         self.sampling_rate = sampling_rate
-        self.mel_spec = torchaudio.transforms.MelSpectrogram(
+        self.mel_spec = torchaudio.transforms.MelSpectrogram( # 오디오 신호 >> Mel 스펙트로그램 변환
             sample_rate=sampling_rate,
             n_fft=n_fft,
             win_length=win_size,
@@ -31,7 +31,7 @@ class AudioPipeline(IPipeline):
         x = get_resampler(sr, self.sampling_rate)(x)
         x = self.mel_spec(x)
         x = torch.squeeze(x)
-        x = x.permute(1, 0)
+        x = x.permute(0,1,2)
         return x
 
 

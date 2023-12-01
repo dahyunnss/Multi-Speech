@@ -28,7 +28,7 @@ def cat_speaker_emb(speaker_emb: Tensor, x: Tensor) -> Tensor:
     """Concat the speaker embedding to the prenet/encoder results.
 
     Args:
-        speaker_emb (Tensor): The speaker embedding of dimension [B, 1, E]
+        speaker_emb (Tensor): The speaker embedding of dimension [B, 1, E] # batch, dimension, embedding 차원
         x (Tensor): The results to be concatenated with of shape [B, M, E]
 
     Returns:

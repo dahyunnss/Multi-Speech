@@ -10,7 +10,7 @@ In order to train the model on your data, follow the steps below
 * prepare your data and make sure the data is formatted in an PSV format as below without the header
 ```
 speaker_id,audio_path,text,duration
-0|file/to/file.wav|the text in that file|3.2 
+0|file/to/file.wav|the text in that file|3.2
 ```
 The speaker id should be integer and starts from 0
 * make sure the audios are MONO if not make the proper conversion to meet this condition
