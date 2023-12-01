@@ -4,16 +4,16 @@ from argparse import ArgumentParser
 def add_model_args(parser):
     group = parser.add_argument_group('Model')
     group.add_argument(
-        '--d_model', type=int, default=256
+        '--d_model', type=int, default= 128  #256
     )
     group.add_argument(
-        '--h', type=int, default=4
+        '--h', type=int, default=1
     )
     group.add_argument(
         '--add_lnorm', type=bool, default=True
     )
     group.add_argument(
-        '--hidden_size', type=int, default=256
+        '--hidden_size', type=int, default=128
     )
     group.add_argument(
         '--p_dopout', type=float, default=0.1
@@ -64,7 +64,7 @@ def add_training_args(parser): #경로
     #     '--train_path', type=str, required= False, default= r'/userHome/userhome2/dahyun/MultiSpeech/train_data/train_data.txt'
     # )
     group.add_argument(
-        '--train_path', type=str, required= True
+        '--train_path', type=str, required=True
     )
 
     # group.add_argument(
@@ -111,7 +111,7 @@ def add_data_args(parser):
         '--tokenizer_path', type=str, default=None 
     )
     group.add_argument(
-        '--n_mels', type=int, default=80
+        '--n_mels', type=int, default=80 #적용할 mel filter 개수
     )
     group.add_argument(
         '--sampling_rate', type=int, default=16000
@@ -120,7 +120,7 @@ def add_data_args(parser):
         '--hop_size', type=int, default=200
     )
     group.add_argument(
-        '--window_size', type=int, default=800
+        '--window_size', type=int, default=800 
     )
     group.add_argument(
         '--n_fft', type=int, default=1024
@@ -207,7 +207,7 @@ def get_model_args(
         'd_model': d_model
     }
     prenet_params[prenet_key] = {
-        'inp_size': args.n_mels,
+        'inp_size': args.n_mels, #issue
         'bottleneck_size': args.bottleneck_size,
         'd_model': d_model,                                                                                                               
         'p_dropout': p_dopout
