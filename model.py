@@ -10,6 +10,7 @@ from layers import (
     DecoderPrenet,
     PositionalEmbedding
     )
+
 from utils import (
     cat_speaker_emb,
     get_positionals
@@ -53,21 +54,24 @@ class Model(nn.Module):
             for _ in range(n_layers)
         ])
 
-        # Decoder의 Prenet 레이어
-        self.dec_prenet = DecoderPrenet(
+        
+        self.dec_prenet = DecoderPrenet( # Decoder의 Prenet 레이어
             **prenet_params
         ).to(device)
+        # print('dp = ', self.dec_prenet)
 
-        
         self.pos_emb = PositionalEmbedding( # 입력 데이터의 위치 정보를 학습 가능한 위치 임베딩과 결합
             **pos_emb_params
             ).to(device)
+        #print('pe = ',self.pos_emb)
         self.speaker_mod = SpeakerModule( # 발화자 정보를 처리하는 Speaker Module
             **speaker_mod_params
         ).to(device)
+        #print('sm = ',self.speaker_mod)
         self.pred_mod = PredModule( # Mel 스펙트로그램 및 Stop 예측을 수행하는 Prediction Module
             **pred_params
         ).to(device)
+        #print('pm = ',self.pred_mod)
 
     def forward(
             self,
@@ -78,10 +82,10 @@ class Model(nn.Module):
         """Passes the input to the model's layers.
 
         Args:
-            x (Tensor): The encoded text input of shpae [B, M].
-            speakers (Tensor): The corresoponding speaker embeddings of shape
-            [B, 1].
-            y (Tensor): The target tensor of shape [B, T, n_mdels].
+            x (Tensor): The encoded text input of shape [B, M].(인코딩된 텍스트 입력)
+            speakers (Tensor): The corresoponding speaker embeddings of shape(해당 speaker의 embedding)
+            [B, 1]. 
+            y (Tensor): The target tensor of shape [B, T, n_mdels].(target tensor)
 
         Returns:
             Tuple[Tensor, Tensor, List[Tensor]]: A tuple contains the mel,
@@ -89,11 +93,15 @@ class Model(nn.Module):
         """
         # TODO: Add Teacher forcing
         # TODO: Add Prediction function
+
         enc_inp = self.pos_emb(x) # 입력 데이터에 위치 임베딩(pos_emb) 추가
+
         speaker_emb = self.speaker_mod(speakers) # 발화자 정보를 처리하여 Speaker Embedding을 생성
+
         prenet_out = self.dec_prenet(y) # Decoder의 Prenet을 통해 입력 데이터를 전처리
 
         dec_input = cat_speaker_emb(speaker_emb, prenet_out) # 발화자 Embedding과 Prenet 출력을 결합하여 Decoder의 입력 데이터를 생성
+
         
         
         # Decoder 입력 데이터에 위치 정보 추가
@@ -108,27 +116,33 @@ class Model(nn.Module):
         stop_results = None
         alignments = [None for _ in range(self.n_layers)]
 
+
         # Decoder의 각 타임 스텝에 대해 반복
         for i in range(1, max_len):
             dec_input_sliced = dec_input[:, :i, :]
+
             iterator = enumerate(zip(self.enc_layers, self.dec_layers))
 
             # 각 레이어에서 Encoder 및 Decoder를 적용하여 각각의 결과 및 Alignment 저장
             for j, (enc_layer, dec_layer) in iterator:
+
                 enc_inp = enc_layer(enc_inp)
+
                 dec_input_sliced, att, temp_center = dec_layer(
                     x=dec_input_sliced,
                     encoder_values=cat_speaker_emb(speaker_emb, enc_inp),
                     center=center
                     )
+
                 alignments[j] = att[:, -1:, :] if alignments[j] is None else \
                     torch.cat([alignments[j], att[:, -1:, :]], dim=1)
             center = temp_center
-
+            
             # Mel 스펙트로그램 및 Stop 예측 결과 저장
             mels, stop_props = self.pred_mod(dec_input_sliced[:, -1:, :])
             mel_results = mels if mel_results is None else \
                 torch.cat([mel_results, mels], dim=1)
             stop_results = stop_props if stop_results is None else \
                 torch.cat([stop_results, stop_props], dim=1)
+
         return mel_results, stop_results, alignments
