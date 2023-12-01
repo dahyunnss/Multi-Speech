@@ -1,7 +1,10 @@
 import os
 # CUDA 환경 설정
-os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+# os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
+import gc
+import torch.nn as nn
 from data import get_batch_loader
 from data_loaders import TextLoader
 from loss import Loss
@@ -61,7 +64,7 @@ class Trainer(ITrainer):
     def set_test_mode(self):
         self.model = self.model.test()
 
-    def _predict(self, text: Tensor, spk: Tensor, speech: Tensor):  
+    def _predict(self, text: Tensor, spk: Tensor, speech: Tensor):  #model_input
         text = text.to(self.device)
         spk = spk.to(self.device)
         speech = speech.to(self.device) # text, spk 입력
@@ -95,7 +98,7 @@ class Trainer(ITrainer):
 
     def train(self):
         total_train_loss = 0
-        for item in self.train_loader:
+        for item in self.train_loader: #issue
             loss = self._train_step(*item)
             total_train_loss += loss
         return total_train_loss / len(self.train_loader)
@@ -116,18 +119,21 @@ class Trainer(ITrainer):
                 ).item()
         return total_test_loss / len(self.test_loader)
 
+
+
     def fit(self):
         # TODO: Add per step exporting here
         # TODO: Add tensor board here
         
         for epoch in range(self.epochs):
-            train_loss = self.train()
+            train_loss = self.train() #issue
             test_loss = self.test()
-            
+          
             print(
                 'epoch={}, training loss: {}, testing loss: {}'.format(
                     epoch, train_loss, test_loss)
                 )
+
             
 
 
@@ -192,7 +198,10 @@ def get_trainer(args: dict):
     aud_args = get_aud_args(args)
     data_args = get_data_args(args)
     trainer_args = get_trainer_args(args)
-    model = get_model(args, model_args).to(device)
+    model = get_model(args, model_args)
+    model = nn.DataParallel(model, device_ids = [0,1,2])
+    model = model.to(device)
+    model.cuda()
     optim = get_optim(args, optim_args, model)
     criterion = get_criterion(args, loss_args)
     text_padder, aud_padder = get_padders(0, tokenizer.special_tokens.pad_id)
@@ -227,4 +236,7 @@ def get_trainer(args: dict):
 
 if __name__ == '__main__':
     args = get_args()
+    gc.collect()
+    torch.cuda.empty_cache()
     get_trainer(args).fit()
+
